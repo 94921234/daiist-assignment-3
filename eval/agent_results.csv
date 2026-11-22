@@ -1,0 +1,97 @@
+id,kind,question,answer,searched,refusal_detected,citations_found,all_citations_in_retrieved_evidence,missing_citations,input_tokens,output_tokens,seconds
+q01,single,How can I turn a vague financial goal into a SMART goal?,"To turn a vague dream or financial goal (such as ""save more money"") into an actionable **SMART goal**, follow these steps based on the CFPB guidelines:
+
+### 1. Align with Your Values
+Start by identifying what is important to you and your family (such as family, health, or financial stability) [money_goals.pdf, page 30, 31]. Aligning goals with your personal values keeps you motivated and makes it easier to prioritize the effort required to reach them [money_goals.pdf, page 26, 30].
+
+---
+
+### 2. Apply the SMART Framework
+Refine your vague goal by asking yourself specific questions for each element of SMART [money_goals.pdf, page 32]:
+
+* **Specific:** Define exactly what you want to accomplish and who will benefit [money_goals.pdf, page 32]. For example, planning a trip to a specific city is easier to achieve than planning a trip ""to the east coast"" [money_goals.pdf, page 26].
+* **Measurable:** Set concrete amounts so you can track your progress [money_goals.pdf, page 27, 32]. For instance, *""Save $5 a week""* is measurable, whereas *""Save more money""* is not [money_goals.pdf, page 27].
+* **Achievable:** Ensure the goal is realistic given your current situation, tools, and support [money_goals.pdf, page 32]. If a goal feels extreme or unreachable (like paying off all debt overnight), break it down into smaller, manageable goals [money_goals.pdf, page 27].
+* **Relevant:** Make sure this is something you truly want right now and that aligns with your priorities [money_goals.pdf, page 27, 32].
+* **Time bound:** Establish a clear target or deadline date [money_goals.pdf, page 27, 32]. Ask yourself when you will reach this goal and whether that time frame is reasonable [money_goals.pdf, page 32].
+
+---
+
+### 3. Turn the Goal into Action
+Once your SMART goal is written down, create an action plan [money_goals.pdf, page 30, 34]:
+1. **Break it into steps:** List the individual action steps needed to reach the goal [money_goals.pdf, page 34].
+2. **Identify resources:** Determine what tools, information, money, or support you need for each step [money_goals.pdf, page 34].
+3. **Set deadlines:** Assign a due date to each step [money_goals.pdf, page 34].
+4. **Build accountability:** Share your goal with a trusted friend or family member and set up regular check-ins to stay on track [money_goals.pdf, page 34].",1,0,6,1,,7508,1594,68.12
+q02,single,Why does the CFPB recommend setting a weekly savings target?,"The CFPB recommends setting a weekly savings target because it breaks larger financial goals down into manageable pieces, making saving easier [money_goals.pdf, page 46]. 
+
+Key reasons and benefits highlighted by the CFPB include:
+
+* **Breaks goals into manageable steps:** Dividing the total amount you want to save by the number of weeks you have makes your goal easier to achieve [money_goals.pdf, page 46].
+* **Builds a safety net for unexpected expenses:** Saving week by week creates a personal safety net and gives you peace of mind knowing you have money set aside when unexpected costs arise [money_goals.pdf, page 46].
+* **Reduces fees and borrowing costs:** Having savings set aside helps you avoid late fees on missed bills and reduces the need to borrow money to cover unexpected expenses [money_goals.pdf, page 46].
+* **Builds confidence:** Watching small weekly contributions add up helps build confidence as you make progress toward your goals [money_goals.pdf, page 46].",1,0,1,1,,3055,534,65.65
+q03,single,What is the main purpose of a cash-flow budget for someone with uneven income?,"For someone with irregular, seasonal, or uneven income, the main purpose of a cash-flow budget is to **plan ways to spread the income received over future weeks or months when little or no money is coming in** [money_goals.pdf, page 99].
+
+Unlike a standard monthly budget, a cash-flow budget breaks your finances down week by week to track the exact timing of when money comes in and when expenses must be paid [money_goals.pdf, page 99]. 
+
+Specifically, a cash-flow budget helps you:
+
+* **Cover essential obligations:** It ensures you have enough cash on hand during low-income weeks to cover priority expenses, such as rent or bills [money_goals.pdf, page 99].
+* **Spot shortfalls in advance:** It identifies specific weeks where your planned expenses exceed your expected income, giving you time to prepare [money_goals.pdf, page 99, 101].
+* **Adjust spending and timing:** It helps you pinpoint non-essential expenses you can cut back on, postpone, or reschedule so that your cash flow stays positive from week to week [money_goals.pdf, page 99].",1,0,2,1,,3623,814,28.35
+q04,single,"If I find a mistake on my credit report, which parties should I contact?","If you find an error on your credit report, you should dispute it with the following parties:
+
+1. **The Credit Reporting Company**: Submit a dispute directly to the credit reporting bureau that generated the report showing the error (most commonly Equifax, Experian, or TransUnion) [money_goals.pdf, page 177]. You can file your dispute online, by phone, or by mail [money_goals.pdf, page 177].
+2. **The Furnisher of the Information**: Submit a copy of your dispute to the business, lender, or creditor that originally provided the inaccurate information [money_goals.pdf, page 177; credit_booklet.pdf, page 10]. You can typically find the furnisher's contact address directly on your credit report [money_goals.pdf, page 177].
+
+---
+
+### Additional Parties & Steps (If Applicable)
+* **Identity Theft Resource**: If you suspect the mistake is the result of identity theft, visit [identitytheft.gov](https://identitytheft.gov) to file a report and take protective steps like placing a fraud alert or security freeze [money_goals.pdf, page 177].
+* **Consumer Financial Protection Bureau (CFPB)**: If your dispute isn't handled in a timely manner, isn't fixed, or if you disagree with the results of the investigation, you can submit a complaint to the CFPB at [consumerfinance.gov/complaint](https://www.consumerfinance.gov/complaint/) or by calling (855) 411-2372 [money_goals.pdf, page 166, page 178; credit_booklet.pdf, page 9].",1,0,4,1,,3771,721,67.71
+q05,single,What is the difference between gross income and net income?,"The main difference between gross income and net income is whether payroll deductions have been taken out:
+
+* **Gross income** is the total amount of money you earn before any mandatory or voluntary deductions are taken from your pay [money_goals.pdf, page 62; behind_on_bills.pdf, page 4].
+* **Net income** (often called take-home pay) is the amount you actually receive after all taxes and other deductions have been subtracted from your gross income [money_goals.pdf, page 62; money_goals.pdf, page 69].
+
+### Deductions that separate gross and net income
+The difference between your gross and net pay comes from two types of deductions [money_goals.pdf, page 62]:
+
+1. **Mandatory deductions:** Required by law, including federal income tax, Social Security and Medicare (FICA), state and local taxes, and wage garnishments [money_goals.pdf, page 62].
+2. **Voluntary deductions:** Contributions you choose to make, such as health, dental, or vision insurance premiums, flexible spending or health savings accounts (FSA/HSA), retirement plan contributions (e.g., 401(k) or 403(b)), union dues, and life insurance premiums [money_goals.pdf, page 62].
+
+### Why it matters
+When budgeting or tracking your monthly expenses, it is generally best to track your **net income**, as that represents the money you actually bring home and have available to pay your bills and living expenses [money_goals.pdf, page 62; money_goals.pdf, page 68].",1,0,4,1,,3121,976,37.48
+q06,single,How can a bill calendar help me avoid late payments?,"A bill calendar helps you avoid late payments, extra fees, and negative credit marks by giving you a total picture of your monthly obligations and helping you plan ahead [money_goals.pdf, page 86; behind_on_bills.pdf, page 8]. 
+
+Here is how a bill calendar helps:
+
+* **Presents a full picture of due dates:** It allows you to see all recurring bills (such as rent, utilities, credit cards, and insurance) in one place so you know exactly when money needs to be available [money_goals.pdf, page 86; behind_on_bills.pdf, page 8].
+* **Builds in processing time:** Rather than recording just the official due date, a bill calendar prompts you to schedule your payment dates in advance—at least 7 days before the due date if paying by mail, or 2 to 3 days before if paying online or in person [money_goals.pdf, page 86; behind_on_bills.pdf, page 9].
+* **Aligns bills with income:** Adding your paydays and income amounts to the calendar allows you to compare weekly income against weekly bills. If a particular week has more bills than income, you can plan ahead or ask creditors to move bill due dates to align better with your pay schedule [money_goals.pdf, page 86; behind_on_bills.pdf, page 8].
+* **Serves as a daily reminder:** Posting the calendar where you see it every day keeps upcoming payments top-of-mind and reduces the stress of unexpected bills [money_goals.pdf, page 86; behind_on_bills.pdf, page 8].",1,0,3,1,,2929,835,64.07
+q07,single,"When I cannot pay all my bills, what should I consider before deciding which to pay first?","When you cannot pay all of your bills at once, CFPB guidance emphasizes prioritizing expenses based on the **risks and consequences of missing each payment**, rather than simply paying the ""squeakiest wheel"" (the debt collector or creditor complaining the loudest) [money_goals.pdf, page 95].
+
+Here are the key factors to evaluate when deciding what to pay first:
+
+### 1. Essential needs to protect your housing, job, and health
+* **Housing and utilities:** Keep rent or mortgage current to avoid eviction or foreclosure, which can make finding future housing difficult [behind_on_bills.pdf, page 15; money_goals.pdf, page 97]. Pay utility bills (electric, gas, water) to avoid shutoffs and expensive reconnection fees [money_goals.pdf, page 97].
+* **Job essentials:** Prioritize expenses required to keep or get a job—such as car payments, gas, bus fare, uniforms/tools, and childcare [behind_on_bills.pdf, page 15; money_goals.pdf, page 96]. Missing an auto loan payment risks repossession, which could cause you to lose your transportation and your job [money_goals.pdf, page 96].
+* **Essential insurance:** Maintain car insurance (required in most states to drive legally), health insurance, and home/renters insurance to protect your health, family, and assets [behind_on_bills.pdf, page 15; money_goals.pdf, page 96].
+
+### 2. Legal obligations
+* **Court-ordered payments:** Pay child support, back child support, and court-ordered fines or fees promptly, as delaying these can result in serious legal consequences [behind_on_bills.pdf, page 15; money_goals.pdf, page 97].
+
+### 3. Lower-priority debts and loan timing
+* **Credit cards and unsecured loans:** Credit card debt, medical bills, student loans, or personal loans generally carry lower immediate risks than losing housing or income [debt_booklet.pdf, page 16]. 
+* **Understand payment timing:** 
+  * Credit card and utility payments received within 30 days of the due date typically do not affect your credit report [behind_on_bills.pdf, page 14].
+  * If a credit card payment is more than 60 days late, the credit card company may raise your interest rate, making it harder to pay off the balance [behind_on_bills.pdf, page 14; behind_on_bills.pdf, page 15].
+
+---
+
+### Important Action Steps
+* **Contact your creditors directly:** Do not ignore unpaid bills. Call your lenders or service providers before missing a payment to explain your situation. They may offer short-term repayment plans, waive late fees, or change your due date to better match your income schedule [money_goals.pdf, page 95; behind_on_bills.pdf, page 14].
+* **Consider short-term strategies:** Rotating which bills you pay month to month—while not ideal—can help avoid severe outcomes like repossession, eviction, or utility shutoffs while you stabilize your finances [behind_on_bills.pdf, page 14].
+* **Seek professional guidance:** You can contact a certified credit counselor or HUD-approved housing counselor for free or low-cost help creating a budget and debt repayment plan [money_goals.pdf, page 95; behind_on_bills.pdf, page 14].",1,0,6,1,,7974,1826,74.76
