@@ -172,9 +172,22 @@ async def answer_with_trace(question: str) -> dict:
                 system_prompt=SYSTEM_PROMPT.read_text(encoding="utf-8"),
             )
             result = await agent.ainvoke(
-                {"messages": [{"role": "user", "content": question}]},
-                config={"recursion_limit": 12},
-            )
+                {
+                    "messages": [{
+                    "role": "user",
+                    "content": (
+                        question
+                        + "\n\nAnswer in no more than 100 words. "
+                        "Be direct and include only information necessary to answer "
+                        "the question. Use a maximum of 3 short bullet points. "
+                        "Cite every factual claim using [filename.pdf, page N]. "
+                        "If the documents do not contain the answer, explicitly "
+                        "say so instead of guessing."
+                    ),
+                }]
+            },
+            config={"recursion_limit": 12},
+        )
 
     messages = result.get("messages", [])
     answer = _text_from_content(messages[-1].content) if messages else ""
