@@ -7,6 +7,7 @@ agreement with eval/human_labels.csv. Save results in eval/.
 
 Start from session 10's 07-own-harness/evaluate.py.
 """
+
 import csv
 import hashlib
 import json
@@ -339,37 +340,6 @@ def append_jsonl(path, record):
         file.write(json.dumps(record, ensure_ascii=False) + "\n")
         file.flush()
 
-def is_daily_quota_error(error):
-    """Recognize daily quota errors inside nested exceptions."""
-    stack = [error]
-    seen = set()
-
-    while stack:
-        current = stack.pop()
-
-        if id(current) in seen:
-            continue
-        seen.add(id(current))
-
-        message = str(current).lower()
-
-        if (
-            "requests per day" in message
-            or "generaterequestsperday" in message
-            or "generate_content_free_tier_requests" in message
-        ):
-            return True
-
-        if isinstance(current, BaseExceptionGroup):
-            stack.extend(current.exceptions)
-
-        if current.__cause__ is not None:
-            stack.append(current.__cause__)
-
-        if current.__context__ is not None:
-            stack.append(current.__context__)
-
-    return False
 
 def is_transient_error(error):
     """Find 429/503 even when MCP/AnyIO wraps it in ExceptionGroup."""
@@ -424,26 +394,6 @@ def run_agent_questions(questions, limit=None, refresh=None):
             try:
                 response = ask(row["question"])
                 break
-            except Exception as exc:
-                if is_daily_quota_error(exc):
-                    print(
-                        f"Daily Gemini quota exhausted on {qid}. "
-                        "Previous answers saved. Ending this batch."
-                    )
-                    return previous
-
-                if attempt == 3 or not is_transient_error(exc):
-                    raise RuntimeError(
-                        f"Failed on {qid}. Completed answers are saved."
-                    ) from exc
-
-                duration = 12 * (2 ** attempt)
-                print(
-                    f"Transient model/API error for {qid}; "
-                    f"retrying after {duration}s.",
-                    flush=True,
-                )
-                time.sleep(duration)
             except Exception as exc:
                 if attempt == 3 or not is_transient_error(exc):
                     raise RuntimeError(f"Failed on {qid}. Completed answers are saved.") from exc
@@ -559,58 +509,190 @@ notes (a brief explanation; state which claims are unsupported if any).
         raise ValueError(f"Judge did not return JSON: {raw[:300]}")
 
 
-def run_judge(questions, limit=None, refresh=None):
-    from agent import MODEL
-    runs = read_jsonl(AGENT_RUNS_PATH)
+
+def judge_cache_key(row, run, model):
+    """Same cache key as the original one-answer judge; old verdicts still count."""
+    return hashlib.sha256(json.dumps({
+        "answer": run["answer"], "reference": row["reference_answer"],
+        "passages": run["passages"], "judge_model": model,
+    }, sort_keys=True).encode()).hexdigest()
+
+
+def concise_judge_evidence(run, char_budget=5200, per_passage=1600):
+    """Prioritize retrieved passages cited in the answer to save input tokens.
+
+    Excerpts are a cost/coverage trade-off. The final report must disclose
+    that the judge sees excerpts, not necessarily every retrieved character.
+    """
+    passages = list(run.get("passages", []))
+    cited = parse_citations(run.get("answer", ""))
+    passages.sort(key=lambda p: (
+        (p.get("source", ""), p.get("location", "")) not in cited,
+        p.get("source", ""), p.get("location", ""),
+    ))
+    excerpts = []
+    remaining = char_budget
+    for p in passages:
+        heading = f"[{p.get('source', '?')}, {p.get('location', '?')}] "
+        allowance = min(per_passage, remaining - len(heading))
+        if allowance < 100:
+            break
+        excerpt = heading + str(p.get("text", ""))[:allowance]
+        excerpts.append(excerpt)
+        remaining -= len(excerpt)
+    return excerpts
+
+
+def judge_batch(entries, model):
+    """One model request scores an entire batch using saved answers/evidence."""
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    from api_key import load_api_key
+
+    cases = [{
+        "id": row["id"], "type": row["kind"], "question": row["question"],
+        "reference_answer": row["reference_answer"],
+        "assistant_answer": run["answer"],
+        "retrieved_evidence_excerpts": concise_judge_evidence(run),
+    } for row, run in entries]
+    prompt = (
+        "You are an independent RAG evaluator. Score EACH case separately. "
+        "Use ONLY its reference answer and retrieved evidence excerpts, not outside "
+        "knowledge or human grades. For unanswerable cases, a refusal to invent "
+        "unavailable personal or corpus information is correct=1. "
+        "correct=1 only when the substantive answer matches the reference. "
+        "supported=1 only if ALL substantive factual claims are justified by "
+        "retrieved evidence; a citation alone is not proof. An honest refusal "
+        "does not require a citation. If excerpts omit needed context, flag "
+        "uncertainty in notes instead of assuming the citation proves support. "
+        "Return ONLY a JSON array with one object per case: "
+        '{"id":"q01","correct":1,"supported":1,"notes":"brief reason"}. '
+        "Keep notes under 18 words. No markdown.\nCASES: "
+        + json.dumps(cases, ensure_ascii=False, separators=(",", ":"))
+    )
+    # Disable SDK-level retries: a daily-limit 429 cannot be fixed by waiting seconds.
+    judge = ChatGoogleGenerativeAI(
+        model=model,
+        api_key=load_api_key(),
+        max_retries=0,
+        max_output_tokens=4096,
+        thinking_level="low",
+        response_mime_type="application/json",
+    )
+    response = judge.invoke(prompt)
+    raw = model_text(response).strip()
+    raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.I)
+    raw = re.sub(r"\s*```$", "", raw)
+    try:
+        verdicts = json.loads(raw)
+    except json.JSONDecodeError:
+        match = re.search(r"\[[\s\S]*\]", raw)
+        if not match:
+            raise ValueError(f"Judge returned invalid JSON: {raw[:400]}")
+        verdicts = json.loads(match.group(0))
+    expected = {row["id"] for row, _ in entries}
+    if (not isinstance(verdicts, list) or len(verdicts) != len(entries)
+            or not all(isinstance(v, dict) for v in verdicts)
+            or {v.get("id") for v in verdicts} != expected):
+        raise ValueError(f"Judge response IDs do not match batch: expected {sorted(expected)}")
+    for v in verdicts:
+        if str(v.get("correct")) not in ("0", "1") or str(v.get("supported")) not in ("0", "1"):
+            raise ValueError(f"Invalid judge grade: {v}")
+    usage = getattr(response, "usage_metadata", None) or {}
+    if usage:
+        print(f"  Judge tokens: input={usage.get('input_tokens', '?')}, "
+              f"output={usage.get('output_tokens', '?')}", flush=True)
+    return verdicts
+
+
+def save_judge_csv(questions):
     previous = read_jsonl(JUDGE_RUNS_PATH)
+    rows = [
+        {field: previous[row["id"]][field] for field in ("id", "correct", "supported", "notes")}
+        for row in questions if row["id"] in previous
+    ]
+    if rows:
+        with JUDGE_RESULTS_PATH.open("w", encoding="utf-8", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=("id", "correct", "supported", "notes"))
+            writer.writeheader()
+            writer.writerows(rows)
+    return rows
+
+
+def run_judge(questions, limit=None, refresh=None, batch_size=5, max_batches=None):
+    """Judge cached answers in batches; never regenerate agent answers here."""
+    from agent import MODEL
+    from os import environ
+
+    if not 1 <= batch_size <= 5:
+        raise ValueError("batch_size must be between 1 and 5")
+    # Optional separate model for judging, only if available to your API key.
+    judge_model = environ.get("RAG_JUDGE_MODEL", MODEL)
     target = questions[:limit] if limit else questions
     refresh = set(refresh or [])
-    for position, row in enumerate(target, start=1):
+
+    # Require real, already-recorded human judgments to avoid leakage.
+    valid_human = set()
+    if HUMAN_PATH.exists():
+        with HUMAN_PATH.open(encoding="utf-8-sig", newline="") as f:
+            valid_human = {
+                row["id"] for row in csv.DictReader(f)
+                if row.get("id") and row.get("correct") in ("0", "1")
+                and row.get("supported") in ("0", "1")
+            }
+    if len(valid_human) < 20:
+        raise RuntimeError(f"Need 20+ independent grades in eval/human_labels.csv; found {len(valid_human)}")
+
+    runs = read_jsonl(AGENT_RUNS_PATH)
+    previous = read_jsonl(JUDGE_RUNS_PATH)
+    todo = []
+    cached_count = 0
+    missing_count = 0
+    for row in target:
         qid = row["id"]
         run = runs.get(qid)
         if run is None:
-            print(f"[{position}/{len(target)}] {qid}: no answer, cannot judge")
+            print(f"{qid}: no cached agent answer; skipping (no API call)")
+            missing_count += 1
             continue
-        key = hashlib.sha256(json.dumps({
-            "answer": run["answer"], "reference": row["reference_answer"],
-            "passages": run["passages"], "judge_model": MODEL,
-        }, sort_keys=True).encode()).hexdigest()
+        key = judge_cache_key(row, run, judge_model)
         old = previous.get(qid)
         if old and old.get("cache_key") == key and qid not in refresh:
-            print(f"[{position}/{len(target)}] {qid}: judge cached")
+            cached_count += 1
             continue
-        print(f"[{position}/{len(target)}] {qid}: judging...", flush=True)
-        for attempt in range(4):
+        todo.append((row, run, key))
+
+    print(f"Judge model: {judge_model}; cached={cached_count}; "
+          f"missing answers={missing_count}; to judge={len(todo)}; "
+          f"batch size={batch_size}.", flush=True)
+    batches = [todo[i:i + batch_size] for i in range(0, len(todo), batch_size)]
+    if max_batches is not None:
+        batches = batches[:max_batches]
+    try:
+        for number, batch in enumerate(batches, 1):
+            ids = ", ".join(row["id"] for row, _, _ in batch)
+            print(f"Batch {number}/{len(batches)}: {ids}", flush=True)
             try:
-                verdict = judge_one(row, run, MODEL)
-                if str(verdict.get("correct")) not in ("0", "1") or str(verdict.get("supported")) not in ("0", "1"):
-                    raise ValueError(f"Judge response has non-binary labels: {verdict}")
-                break
+                verdicts = judge_batch([(row, run) for row, run, _ in batch], judge_model)
             except Exception as exc:
-                if attempt == 3 or not is_transient_error(exc):
-                    raise RuntimeError(f"Judge failed on {qid}; saved grades are safe.") from exc
-                duration = 12 * (2 ** attempt)
-                print(f"  Transient judge/API error; retrying after {duration}s.", flush=True)
-                time.sleep(duration)
-        record = {
-            "id": qid,
-            "cache_key": key,
-            "correct": int(verdict["correct"]),
-            "supported": int(verdict["supported"]),
-            "notes": str(verdict.get("notes", "")),
-        }
-        append_jsonl(JUDGE_RUNS_PATH, record)
-        previous[qid] = record
-    rows = []
-    for row in questions:
-        if row["id"] in previous:
-            grade = previous[row["id"]]
-            rows.append({k: grade[k] for k in ("id", "correct", "supported", "notes")})
-    if rows:
-        with JUDGE_RESULTS_PATH.open("w", encoding="utf-8", newline="") as file:
-            writer = csv.DictWriter(file, fieldnames=list(rows[0]))
-            writer.writeheader()
-            writer.writerows(rows)
+                print(f"Judge stopped without retrying. Saved grades are safe. Error: {exc}", flush=True)
+                break
+            by_id = {v["id"]: v for v in verdicts}
+            for row, _run, key in batch:
+                verdict = by_id[row["id"]]
+                record = {
+                    "id": row["id"], "cache_key": key,
+                    "correct": int(verdict["correct"]),
+                    "supported": int(verdict["supported"]),
+                    "notes": str(verdict.get("notes", "")),
+                }
+                append_jsonl(JUDGE_RUNS_PATH, record)
+                previous[row["id"]] = record
+            print(f"  Saved {len(batch)} grades.", flush=True)
+            if number < len(batches):
+                time.sleep(10)  # Avoid back-to-back rate spikes.
+    finally:
+        rows = save_judge_csv(questions)
+        print(f"Saved {len(rows)} judge grades in eval/judge_results.csv.", flush=True)
     return rows
 
 
@@ -661,6 +743,8 @@ def cli():
     parser.add_argument("--judge-only", action="store_true", help="Judge saved answers without calling the agent")
     parser.add_argument("--limit", type=int, default=None, help="Pilot the first N questions and cache results")
     parser.add_argument("--refresh", action="append", default=[], help="Re-run a particular question ID, e.g., --refresh q30")
+    parser.add_argument("--batch-size", type=int, default=5, help="Answers graded per judge request (1-5; default 5)")
+    parser.add_argument("--max-batches", type=int, default=None, help="Only run this many judge batches (1 = one-call pilot)")
     args = parser.parse_args()
     questions = load_questions()
     if not args.judge_only:
@@ -671,7 +755,8 @@ def cli():
             print("\nAnswers are in eval/agent_results.csv and detailed evidence is in eval/agent_runs.jsonl.")
             print("Grade 20+ answers yourself in eval/human_labels.csv BEFORE inspecting the LLM judge's verdicts.")
     if not args.answers_only:
-        run_judge(questions, limit=args.limit, refresh=args.refresh)
+        run_judge(questions, limit=args.limit, refresh=args.refresh,
+                  batch_size=args.batch_size, max_batches=args.max_batches)
     end_to_end_summary(questions)
 
 
