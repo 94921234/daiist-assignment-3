@@ -27,3 +27,6 @@ q24,1,0,"Correctly describes both budgeting tools but overstates their ability t
 q25,1,1,"Correctly distinguishes debt collection from credit-report disputes and identifies their different procedures."
 q26,1,1,"Appropriately refuses to predict an individualized live mortgage rate and provides relevant general guidance."
 q27,1,1,"Correctly refuses to invent personal credit scores, explains access limitations, and provides relevant CFPB guidance."
+q28,1,1,"Correctly refuses to predict a lender-specific future credit limit decision."
+q29,1,1,"Correctly refuses to invent personal bank balances or pending transactions."
+q30,1,1,"Correctly refuses because the current corpus lacks sufficient reverse-mortgage guidance."
