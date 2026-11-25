@@ -21,7 +21,7 @@ The **baseline** corpus contains five public documents published by the U.S. Con
 | *Debt Getting in Your Way?* (`debt_booklet.pdf`) | [CFPB PDF](https://files.consumerfinance.gov/f/documents/cfpb_your-money-your-goals_debt_booklet_cobrand.pdf) | Not stated clearly in retrieved version | CFPB-created material: public domain, with trademark and third-party exceptions | 4,964 |
 | *Want Credit to Work for You?* (`credit_booklet.pdf`) | [CFPB PDF](https://files.consumerfinance.gov/f/documents/cfpb_your-money-your-goals_credit_booklet_cobrand.pdf) | Not stated clearly in retrieved version | CFPB-created material: public domain, with trademark and third-party exceptions | 5,562 |
 | *Your Home Loan Toolkit: A Step-by-Step Guide* (`home_loan_toolkit.pdf`) | [CFPB PDF](https://files.consumerfinance.gov/f/documents/cfpb_your-home-loan-toolkit.pdf) | Updated August 2015 | CFPB-created material: public domain, with trademark and third-party exceptions | 10,144 |
-| **Total baseline** | | | | **88,617** |
+| **Total baseline** | | | | **88,598** |
 
 The CFPB states that its own website content is generally public domain, though trademarks and third-party materials can have separate restrictions ([CFPB legal notice](https://www.consumerfinance.gov/privacy/website-privacy-policy/)). The booklets themselves also permit reproduction of their CFPB-authored content. I used public educational PDFs and did not collect users' financial records. **Source freshness is a separate issue from permission to reuse**: some booklet information may no longer reflect current credit-report practices.
 
@@ -128,12 +128,12 @@ I recorded **30 human grades before reviewing the LLM judge** in `eval/human_lab
 | Wrong refusals identified by human review | **0** |
 | Valid cited source/page matches (code proxy) | **100%** |
 | LLM judge completed | **30/30** |
-| Judge correctness rate | **[VERIFY `judge_correct_rate`]** |
-| Judge fully supported rate | **[VERIFY `judge_supported_rate`]** |
-| Human–judge correctness agreement | **[VERIFY FINAL VALUE FROM `eval/end_to_end_summary.json`]** |
-| Human–judge support agreement | **[VERIFY FINAL VALUE FROM `eval/end_to_end_summary.json`]** |
+| Judge correctness rate | **100%** |
+| Judge fully supported rate | **100%** |
+| Human–judge correctness agreement | **100%** |
+| Human–judge support agreement | **83.33%** |
 
-For the first **25** judge comparisons, correctness agreement was **100%** and support agreement **80%**. The five identified support disagreements were **q03, q07, q21, q23, and q24**. The judge marked them supported, whereas I marked them unsupported for overstatement or insufficiently qualified extra claims. The final agreement percentage over all 30 must be read from the committed summary; do not infer it solely from the first 25.
+Across all **30 evaluated questions**, human–judge correctness agreement was **100% (30/30)**, while support agreement was **83.33% (25/30)**. The five support disagreements were **q03, q07, q21, q23, and q24**. In each case, the LLM judge classified the answer as fully supported, whereas my stricter human evaluation identified overstatements or insufficiently qualified claims. This suggests that the judge was less sensitive to subtle unsupported details, highlighting the importance of human review even when automated evaluation reports perfect scores.
 
 ## Failures
 
