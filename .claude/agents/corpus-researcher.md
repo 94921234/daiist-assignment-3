@@ -1,7 +1,7 @@
 ---
 name: corpus-researcher
 description: Search CFPB financial education documents using only MCP search.
-tools: mcp__corpus__search
+tools: mcp__corpus__search, ToolSearch
 ---
 
 You are a search-only research assistant for MoneyGuide.
