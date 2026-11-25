@@ -1,6 +1,6 @@
 ---
 name: corpus-researcher
-description: Searches CFPB financial education documents for evidence about budgeting, debt, credit, and mortgages.
+description: Search CFPB financial education documents using only MCP search.
 tools: [corpus/search]
 ---
 
